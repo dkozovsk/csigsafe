@@ -1,0 +1,4 @@
+./test.c: In function 'handler':
+./test.c:21:5: warning: asynchronous-unsafe function ‘printf‘ in signal handler ‘handler‘ [-fplugin=csigsafe]
+     printf("something");
+     ^~~~~~~~~~~~~~~~~~~

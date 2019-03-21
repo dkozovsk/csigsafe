@@ -1,0 +1,8 @@
+./test.c: In function 'main':
+./test.c:14:5: warning: asynchronous-unsafe function ‘my_fnc0‘ in signal handler ‘some_handler‘ [-fplugin=csigsafe]
+     my_fnc0();
+     ^~~~~~~~~
+./test.c: In function 'handler':
+./test.c:53:5: warning: asynchronous-unsafe function ‘printf‘ in signal handler ‘handler‘ [-fplugin=csigsafe]
+     printf("something");
+     ^~~~~~~~~~~~~~~~~~~

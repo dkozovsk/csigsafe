@@ -1,0 +1,4 @@
+./test.c: In function 'handler_wrong':
+./test.c:19:4: warning: errno may be changed in signal handler ‘handler_wrong‘ [-fplugin=csigsafe]
+    kill(SIGKILL,0);
+    ^~~~~~~~~~~~~~~

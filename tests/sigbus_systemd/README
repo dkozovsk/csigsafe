@@ -1,0 +1,7 @@
+Sources for test taken from systemd project
+version 239, which belong to systemd.
+Systemd is licensed under LGPLv2.1+.
+You can find the up2date sources in the following
+repository:
+
+    https://github.com/systemd/systemd
