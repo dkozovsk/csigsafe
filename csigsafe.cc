@@ -1394,20 +1394,45 @@ void print_note(tree fnc, location_t loc, bool fatal)
 		if (strcmp(get_name(obj.get_fnc_decl()),get_name(fnc))==0)
 		{
 			std::string msg = "function ";
-			msg += get_name(fnc);
+			if(!isatty(STDERR_FILENO))
+			{
+				msg += "‘";
+				msg += get_name(fnc);
+				msg += "‘";
+			}
+			else
+			{
+				msg += "‘\033[1;1m";
+				msg += get_name(fnc);
+				msg += "\033[0m‘";
+			}
 			msg += " calls function";
 			for(remember_error err :obj.err_log)
 			{
 				if(fatal && !err.err_fatal)
 					continue;
-				inform(err.err_loc,"%s %s",msg.c_str(),get_name(err.err_fnc));
+				if(!isatty(STDERR_FILENO))
+					inform(err.err_loc,"%s ‘%s‘",msg.c_str(),get_name(err.err_fnc));
+				else
+					inform(err.err_loc,"%s ‘\033[1;1m%s\033[0m‘",msg.c_str(),get_name(err.err_fnc));
 				print_note(err.err_fnc,err.err_loc,err.err_fatal);
 			}
 			return;
 		}
 	}
 	std::string msg = "function ";
-	msg += get_name(fnc);
+	if(!isatty(STDERR_FILENO))
+	{
+		msg += "‘";
+		msg += get_name(fnc);
+		msg += "‘";
+	}
+	else
+	{
+		msg += "‘\033[1;1m";
+		msg += get_name(fnc);
+		msg += "\033[0m‘";
+	}
 	msg += " is not known to be async-signal-safe";
 	inform(loc,"%s",msg.c_str());
 }

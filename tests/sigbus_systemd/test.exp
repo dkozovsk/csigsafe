@@ -12,7 +12,7 @@ In file included from ./sigbus.c:8:
 ./sigbus.c:88:9: note: in expansion of macro 'assert'
          assert(sn == SIGBUS);
          ^~~~~~
-./macro.h:26:24: note: function __builtin_expect is not known to be async-signal-safe
+./macro.h:26:24: note: function ‘__builtin_expect‘ is not known to be async-signal-safe
  #define _unlikely_(x) (__builtin_expect(!!(x),0))
                        ~^~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:282:21: note: in expansion of macro '_unlikely_'
@@ -38,7 +38,7 @@ In file included from ./macro.h:458,
 ./sigbus.c:88:9: note: in expansion of macro 'assert'
          assert(sn == SIGBUS);
          ^~~~~~
-./log.h:177:9: note: function log_assert_failed_realm is not known to be async-signal-safe
+./log.h:177:9: note: function ‘log_assert_failed_realm‘ is not known to be async-signal-safe
          log_assert_failed_realm(LOG_REALM, (text), __VA_ARGS__)
          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:283:25: note: in expansion of macro 'log_assert_failed'
@@ -63,7 +63,7 @@ In file included from ./sigbus.c:8:
 ./sigbus.c:89:9: note: in expansion of macro 'assert'
          assert(si);
          ^~~~~~
-./macro.h:26:24: note: function __builtin_expect is not known to be async-signal-safe
+./macro.h:26:24: note: function ‘__builtin_expect‘ is not known to be async-signal-safe
  #define _unlikely_(x) (__builtin_expect(!!(x),0))
                        ~^~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:282:21: note: in expansion of macro '_unlikely_'
@@ -89,7 +89,7 @@ In file included from ./macro.h:458,
 ./sigbus.c:89:9: note: in expansion of macro 'assert'
          assert(si);
          ^~~~~~
-./log.h:177:9: note: function log_assert_failed_realm is not known to be async-signal-safe
+./log.h:177:9: note: function ‘log_assert_failed_realm‘ is not known to be async-signal-safe
          log_assert_failed_realm(LOG_REALM, (text), __VA_ARGS__)
          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:283:25: note: in expansion of macro 'log_assert_failed'
@@ -114,7 +114,7 @@ In file included from ./sigbus.c:8:
 ./sigbus.c:92:17: note: in expansion of macro 'assert_se'
                  assert_se(sigaction(SIGBUS, &old_sigaction, NULL) == 0);
                  ^~~~~~~~~
-./macro.h:26:24: note: function __builtin_expect is not known to be async-signal-safe
+./macro.h:26:24: note: function ‘__builtin_expect‘ is not known to be async-signal-safe
  #define _unlikely_(x) (__builtin_expect(!!(x),0))
                        ~^~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:282:21: note: in expansion of macro '_unlikely_'
@@ -140,7 +140,7 @@ In file included from ./macro.h:458,
 ./sigbus.c:92:17: note: in expansion of macro 'assert_se'
                  assert_se(sigaction(SIGBUS, &old_sigaction, NULL) == 0);
                  ^~~~~~~~~
-./log.h:177:9: note: function log_assert_failed_realm is not known to be async-signal-safe
+./log.h:177:9: note: function ‘log_assert_failed_realm‘ is not known to be async-signal-safe
          log_assert_failed_realm(LOG_REALM, (text), __VA_ARGS__)
          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:283:25: note: in expansion of macro 'log_assert_failed'
@@ -155,16 +155,16 @@ In file included from ./macro.h:458,
 ./sigbus.c:98:19: warning: possible asynchronous-unsafe function ‘page_size‘ in signal handler ‘sigbus_handler‘ [-fplugin=csigsafe]
          ul = ul / page_size();
                    ^~~~~~~~~~~
-./sigbus.c:98:19: note: function page_size is not known to be async-signal-safe
+./sigbus.c:98:19: note: function ‘page_size‘ is not known to be async-signal-safe
 ./sigbus.c:99:19: warning: possible asynchronous-unsafe function ‘page_size‘ in signal handler ‘sigbus_handler‘ [-fplugin=csigsafe]
          ul = ul * page_size();
                    ^~~~~~~~~~~
-./sigbus.c:99:19: note: function page_size is not known to be async-signal-safe
+./sigbus.c:99:19: note: function ‘page_size‘ is not known to be async-signal-safe
 ./sigbus.c:103:9: warning: possible asynchronous-unsafe function ‘sigbus_push‘ in signal handler ‘sigbus_handler‘ [-fplugin=csigsafe]
          sigbus_push(aligned);
          ^~~~~~~~~~~~~~~~~~~~
 In file included from ./sigbus.c:8:
-./macro.h:26:24: note: function sigbus_push calls function __builtin_expect
+./macro.h:26:24: note: function ‘sigbus_push‘ calls function ‘__builtin_expect‘
  #define _unlikely_(x) (__builtin_expect(!!(x),0))
                        ~^~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:282:21: note: in expansion of macro '_unlikely_'
@@ -176,7 +176,7 @@ In file included from ./sigbus.c:8:
 ./sigbus.c:28:9: note: in expansion of macro 'assert'
          assert(addr);
          ^~~~~~
-./macro.h:26:24: note: function __builtin_expect is not known to be async-signal-safe
+./macro.h:26:24: note: function ‘__builtin_expect‘ is not known to be async-signal-safe
  #define _unlikely_(x) (__builtin_expect(!!(x),0))
                        ~^~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:282:21: note: in expansion of macro '_unlikely_'
@@ -190,7 +190,7 @@ In file included from ./sigbus.c:8:
          ^~~~~~
 In file included from ./macro.h:458,
                  from ./sigbus.c:8:
-./log.h:177:9: note: function sigbus_push calls function log_assert_failed_realm
+./log.h:177:9: note: function ‘sigbus_push‘ calls function ‘log_assert_failed_realm‘
          log_assert_failed_realm(LOG_REALM, (text), __VA_ARGS__)
          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:283:25: note: in expansion of macro 'log_assert_failed'
@@ -202,7 +202,7 @@ In file included from ./macro.h:458,
 ./sigbus.c:28:9: note: in expansion of macro 'assert'
          assert(addr);
          ^~~~~~
-./log.h:177:9: note: function log_assert_failed_realm is not known to be async-signal-safe
+./log.h:177:9: note: function ‘log_assert_failed_realm‘ is not known to be async-signal-safe
          log_assert_failed_realm(LOG_REALM, (text), __VA_ARGS__)
          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:283:25: note: in expansion of macro 'log_assert_failed'
@@ -214,22 +214,22 @@ In file included from ./macro.h:458,
 ./sigbus.c:28:9: note: in expansion of macro 'assert'
          assert(addr);
          ^~~~~~
-./sigbus.c:32:21: note: function sigbus_push calls function __sync_bool_compare_and_swap_8
+./sigbus.c:32:21: note: function ‘sigbus_push‘ calls function ‘__sync_bool_compare_and_swap_8‘
                  if (__sync_bool_compare_and_swap(&sigbus_queue[u], NULL, addr)) {
                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-./sigbus.c:32:21: note: function __sync_bool_compare_and_swap_8 is not known to be async-signal-safe
-./sigbus.c:33:25: note: function sigbus_push calls function __sync_fetch_and_add_4
+./sigbus.c:32:21: note: function ‘__sync_bool_compare_and_swap_8‘ is not known to be async-signal-safe
+./sigbus.c:33:25: note: function ‘sigbus_push‘ calls function ‘__sync_fetch_and_add_4‘
                          __sync_fetch_and_add(&n_sigbus_queue, 1);
                          ^~~~~~~~~~~~~~~~~~~~
-./sigbus.c:33:25: note: function __sync_fetch_and_add_4 is not known to be async-signal-safe
-./sigbus.c:42:17: note: function sigbus_push calls function __sync_synchronize
+./sigbus.c:33:25: note: function ‘__sync_fetch_and_add_4‘ is not known to be async-signal-safe
+./sigbus.c:42:17: note: function ‘sigbus_push‘ calls function ‘__sync_synchronize‘
                  __sync_synchronize();
                  ^~~~~~~~~~~~~~~~~~~~
-./sigbus.c:42:17: note: function __sync_synchronize is not known to be async-signal-safe
-./sigbus.c:48:21: note: function sigbus_push calls function __sync_bool_compare_and_swap_4
+./sigbus.c:42:17: note: function ‘__sync_synchronize‘ is not known to be async-signal-safe
+./sigbus.c:48:21: note: function ‘sigbus_push‘ calls function ‘__sync_bool_compare_and_swap_4‘
                  if (__sync_bool_compare_and_swap(&n_sigbus_queue, c, c + SIGBUS_QUEUE_MAX))
                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-./sigbus.c:48:21: note: function __sync_bool_compare_and_swap_4 is not known to be async-signal-safe
+./sigbus.c:48:21: note: function ‘__sync_bool_compare_and_swap_4‘ is not known to be async-signal-safe
 In file included from ./sigbus.c:8:
 ./sigbus.c:107:19: warning: possible asynchronous-unsafe function ‘page_size‘ in signal handler ‘sigbus_handler‘ [-fplugin=csigsafe]
          assert_se(mmap(aligned, page_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0) == aligned);
@@ -243,7 +243,7 @@ In file included from ./sigbus.c:8:
 ./sigbus.c:107:9: note: in expansion of macro 'assert_se'
          assert_se(mmap(aligned, page_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0) == aligned);
          ^~~~~~~~~
-./sigbus.c:107:19: note: function page_size is not known to be async-signal-safe
+./sigbus.c:107:19: note: function ‘page_size‘ is not known to be async-signal-safe
          assert_se(mmap(aligned, page_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0) == aligned);
                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:26:44: note: in definition of macro '_unlikely_'
@@ -267,7 +267,7 @@ In file included from ./sigbus.c:8:
 ./sigbus.c:107:9: note: in expansion of macro 'assert_se'
          assert_se(mmap(aligned, page_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0) == aligned);
          ^~~~~~~~~
-./sigbus.c:107:19: note: function mmap is not known to be async-signal-safe
+./sigbus.c:107:19: note: function ‘mmap‘ is not known to be async-signal-safe
          assert_se(mmap(aligned, page_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0) == aligned);
                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:26:44: note: in definition of macro '_unlikely_'
@@ -291,7 +291,7 @@ In file included from ./sigbus.c:8:
 ./sigbus.c:107:9: note: in expansion of macro 'assert_se'
          assert_se(mmap(aligned, page_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0) == aligned);
          ^~~~~~~~~
-./macro.h:26:24: note: function __builtin_expect is not known to be async-signal-safe
+./macro.h:26:24: note: function ‘__builtin_expect‘ is not known to be async-signal-safe
  #define _unlikely_(x) (__builtin_expect(!!(x),0))
                        ~^~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:282:21: note: in expansion of macro '_unlikely_'
@@ -317,7 +317,7 @@ In file included from ./macro.h:458,
 ./sigbus.c:107:9: note: in expansion of macro 'assert_se'
          assert_se(mmap(aligned, page_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0) == aligned);
          ^~~~~~~~~
-./log.h:177:9: note: function log_assert_failed_realm is not known to be async-signal-safe
+./log.h:177:9: note: function ‘log_assert_failed_realm‘ is not known to be async-signal-safe
          log_assert_failed_realm(LOG_REALM, (text), __VA_ARGS__)
          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./macro.h:283:25: note: in expansion of macro 'log_assert_failed'
