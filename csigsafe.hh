@@ -175,6 +175,7 @@ bool equal_sets(std::set<errno_var> &a, std::set<errno_var> &b);
 errno_var tree_to_errno_var(tree var);
 //warnings
 inline void print_warning(tree handler, tree fnc,location_t loc,bool fatal);
+void print_note(tree fnc, location_t loc, bool fatal);
 inline void print_errno_warning(tree handler, location_t loc);
 //errno list operations
 bool is_var_in_list(tree var, std::list<tree> &list);

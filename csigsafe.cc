@@ -144,14 +144,11 @@ void plugin_data::handle_dependencies()
 								obj.set_flag(FLG_FATAL,return_number==RC_ASYNCH_UNSAFE);
 							if (obj.get_flag(FLG_IS_HANDLER))
 								print_warning(obj.get_fnc_decl(),depends.fnc,depends.loc,return_number==RC_ASYNCH_UNSAFE);
-							else
-							{
-								remember_error new_err;
-								new_err.err_loc = depends.loc;
-								new_err.err_fnc = depends.fnc;
-								new_err.err_fatal = return_number==RC_ASYNCH_UNSAFE;
-								obj.err_log.push_back(new_err);
-							}
+							remember_error new_err;
+							new_err.err_loc = depends.loc;
+							new_err.err_fnc = depends.fnc;
+							new_err.err_fatal = return_number==RC_ASYNCH_UNSAFE;
+							obj.err_log.push_back(new_err);
 						}
 						std::list<depend_data>::iterator tmp=depend_it;
 						++depend_it;
@@ -921,14 +918,11 @@ void function_data::process_gimple_call(bb_data &status,gimple * stmt, bool &all
 
 		if (this->get_flag(FLG_IS_HANDLER))
 			print_warning(this->get_fnc_decl(),fn_decl,gimple_location(stmt),return_number==RC_ASYNCH_UNSAFE);
-		else
-		{
-			remember_error new_err;
-			new_err.err_loc = gimple_location(stmt);
-			new_err.err_fnc = fn_decl;
-			new_err.err_fatal = return_number==RC_ASYNCH_UNSAFE;
-			this->err_log.push_back(new_err);
-		}
+		remember_error new_err;
+		new_err.err_loc = gimple_location(stmt);
+		new_err.err_fnc = fn_decl;
+		new_err.err_fatal = return_number==RC_ASYNCH_UNSAFE;
+		this->err_log.push_back(new_err);
 
 		if (return_number == RC_ASYNCH_UNSAFE)
 			this->set_flag(FLG_FATAL,true);
@@ -1221,11 +1215,9 @@ int8_t scan_own_function (const char* name,std::list<const char*> &call_tree,boo
 					return return_number;
 				if (obj.get_flag(FLG_NOT_SAFE))
 				{
-					while (!obj.err_log.empty())
+					for(remember_error err :obj.err_log)
 					{
-						remember_error err = obj.err_log.front();
 						print_warning(obj.get_fnc_decl(),err.err_fnc,err.err_loc,err.err_fatal);
-						obj.err_log.pop_front();
 					}
 					break;
 				}
@@ -1392,6 +1384,32 @@ void print_warning(tree handler,tree fnc,location_t loc,bool fatal)
 		msg += "\033[0m]";
 	}
 	warning_at(loc,0,"%s",msg.c_str());
+	print_note(fnc, loc, fatal);
+}
+
+void print_note(tree fnc, location_t loc, bool fatal)
+{
+	for (function_data &obj: data.fnc_list)
+	{
+		if (strcmp(get_name(obj.get_fnc_decl()),get_name(fnc))==0)
+		{
+			std::string msg = "function ";
+			msg += get_name(fnc);
+			msg += " calls function";
+			for(remember_error err :obj.err_log)
+			{
+				if(fatal && !err.err_fatal)
+					continue;
+				inform(err.err_loc,"%s %s",msg.c_str(),get_name(err.err_fnc));
+				print_note(err.err_fnc,err.err_loc,err.err_fatal);
+			}
+			return;
+		}
+	}
+	std::string msg = "function ";
+	msg += get_name(fnc);
+	msg += " is not known to be async-signal-safe";
+	inform(loc,"%s",msg.c_str());
 }
 
 //print warning about changed errno in signal handler 'handler'

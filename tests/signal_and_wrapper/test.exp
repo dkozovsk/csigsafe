@@ -2,7 +2,21 @@
 ./test.c:14:5: warning: asynchronous-unsafe function ‘my_fnc0‘ in signal handler ‘some_handler‘ [-fplugin=csigsafe]
      my_fnc0();
      ^~~~~~~~~
+./test.c:25:2: note: function my_fnc0 calls function my_fnc1
+  my_fnc1();
+  ^~~~~~~~~
+./test.c:29:2: note: function my_fnc1 calls function my_fnc2
+  my_fnc2();
+  ^~~~~~~~~
+./test.c:33:2: note: function my_fnc2 calls function my_fnc3
+  my_fnc3();
+  ^~~~~~~~~
+./test.c:37:2: note: function my_fnc3 calls function __builtin_puts
+  printf("aaaa\n");
+  ^~~~~~~~~~~~~~~~
+./test.c:37:2: note: function __builtin_puts is not known to be async-signal-safe
 ./test.c: In function 'handler':
 ./test.c:53:5: warning: asynchronous-unsafe function ‘printf‘ in signal handler ‘handler‘ [-fplugin=csigsafe]
      printf("something");
      ^~~~~~~~~~~~~~~~~~~
+./test.c:53:5: note: function printf is not known to be async-signal-safe

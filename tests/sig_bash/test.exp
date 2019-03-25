@@ -2,7 +2,71 @@
 ./sig.c:542:7: warning: possible asynchronous-unsafe function ‘termsig_handler‘ in signal handler ‘termsig_sighandler‘ [-fplugin=csigsafe]
        termsig_handler (sig);
        ^~~~~~~~~~~~~~~~~~~~~
+./sig.c:573:24: note: function termsig_handler calls function signal_is_trapped
+   if (sig == SIGINT && signal_is_trapped (SIGINT))
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~
+./sig.c:573:24: note: function signal_is_trapped is not known to be async-signal-safe
+./sig.c:574:5: note: function termsig_handler calls function run_interrupt_trap
+     run_interrupt_trap (0);
+     ^~~~~~~~~~~~~~~~~~~~~~
+./sig.c:574:5: note: function run_interrupt_trap is not known to be async-signal-safe
+./sig.c:586:5: note: function termsig_handler calls function read_tty_cleanup
+     read_tty_cleanup ();
+     ^~~~~~~~~~~~~~~~~~~
+./sig.c:586:5: note: function read_tty_cleanup is not known to be async-signal-safe
+./sig.c:590:5: note: function termsig_handler calls function hangup_all_jobs
+     hangup_all_jobs ();
+     ^~~~~~~~~~~~~~~~~~
+./sig.c:590:5: note: function hangup_all_jobs is not known to be async-signal-safe
+./sig.c:591:3: note: function termsig_handler calls function end_job_control
+   end_job_control ();
+   ^~~~~~~~~~~~~~~~~~
+./sig.c:591:3: note: function end_job_control is not known to be async-signal-safe
+./sig.c:595:3: note: function termsig_handler calls function unlink_fifo_list
+   unlink_fifo_list ();
+   ^~~~~~~~~~~~~~~~~~~
+./sig.c:595:3: note: function unlink_fifo_list is not known to be async-signal-safe
+./sig.c:602:3: note: function termsig_handler calls function run_exit_trap
+   run_exit_trap (); /* XXX - run exit trap possibly in signal context? */
+   ^~~~~~~~~~~~~~~~
+./sig.c:602:3: note: function run_exit_trap is not known to be async-signal-safe
 ./sig.c: In function 'set_signal_handler':
 ./sig.c:635:7: warning: asynchronous-unsafe function ‘throw_to_top_level‘ in signal handler ‘sigint_sighandler‘ [-fplugin=csigsafe]
        throw_to_top_level ();
        ^~~~~~~~~~~~~~~~~~~~~
+./sig.c:470:5: note: function throw_to_top_level calls function jump_to_top_level
+     jump_to_top_level (DISCARD);
+     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from ./bashjmp.h:24,
+                 from ./shell.h:25,
+                 from ./sig.c:37:
+./posixjmp.h:35:28: note: function jump_to_top_level calls function siglongjmp
+ #  define sh_longjmp(x, n) siglongjmp((x), (n))
+                            ^~~~~~~~~~~~~~~~~~~~
+./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
+   sh_longjmp (top_level, value);
+   ^~~~~~~~~~
+./posixjmp.h:35:28: note: function siglongjmp is not known to be async-signal-safe
+ #  define sh_longjmp(x, n) siglongjmp((x), (n))
+                            ^~~~~~~~~~~~~~~~~~~~
+./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
+   sh_longjmp (top_level, value);
+   ^~~~~~~~~~
+./sig.c:472:5: note: function throw_to_top_level calls function jump_to_top_level
+     jump_to_top_level (EXITPROG);
+     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from ./bashjmp.h:24,
+                 from ./shell.h:25,
+                 from ./sig.c:37:
+./posixjmp.h:35:28: note: function jump_to_top_level calls function siglongjmp
+ #  define sh_longjmp(x, n) siglongjmp((x), (n))
+                            ^~~~~~~~~~~~~~~~~~~~
+./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
+   sh_longjmp (top_level, value);
+   ^~~~~~~~~~
+./posixjmp.h:35:28: note: function siglongjmp is not known to be async-signal-safe
+ #  define sh_longjmp(x, n) siglongjmp((x), (n))
+                            ^~~~~~~~~~~~~~~~~~~~
+./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
+   sh_longjmp (top_level, value);
+   ^~~~~~~~~~
