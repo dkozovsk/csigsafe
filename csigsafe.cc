@@ -769,8 +769,17 @@ int8_t is_handler_ok_fnc (const char* name)
 	static const char* safe_fnc[]={
 		"aio_error", "alarm", "cfgetispeed", "cfgetospeed", "getegid",
 		"geteuid", "getgid", "getpgrp", "getpid", "getppid", "getuid",
+		"htonl", "htons", "longjmp", "memccpy", "memchr", "memcmp",
+		"memcpy", "memmove", "memset", "ntohl", "ntohs",
 		"posix_trace_event", "pthread_kill", "pthread_self",
-		"pthread_sigmask", "raise", "sigfillset", "sleep", "umask"};
+		"pthread_sigmask", "raise", "sigfillset", "siglongjmp",
+		"sleep", "stpcpy", "stpncpy", "strcat", "strchr", "strcmp",
+		"strcpy", "strspn", "strlen", "strncat", "strncmp", "strncpy",
+		"strnlen", "strpbrk", "strchr", "strspn", "strstr", "strtok",
+		"umask", "wcpcpy", "wcpncpy", "wcscat", "wcschr", "wcscmp",
+		"wcscpy", "wcscspn", "wcslen", "wcsncat", "wcsncmp", "wcsncpy",
+		"wcsnlen", "wcspbrk", "wcsrchr", "wcsspn", "wcsstr", "wcstok",
+		"wmemchr", "wmemcmp", "wmemcpy", "wmemmove", "wmemset"};
 	static const char* change_errno_fnc[]={
 		"accept", "access", "aio_return", "aio_suspend", "bind", "cfsetispeed", "cfsetospeed",
 		"clock_gettime", "close", "connect", "creat", "dup", "dup2", "execl", "execle", "execv",
@@ -820,15 +829,15 @@ bool is_handler_wrong_fnc(const char* name)
 		"fputwc_unlocked", "fputws", "fputws_unlocked", "free", "freopen",
 		"freopen64", "fscanf", "fwprintf", "fwscanf", "getc", "getc_unlocked",
 		"getchar", "getchar_unlocked", "getw", "getwc", "getwc_unlocked",
-		"getwchar", "getwchar_unlocked", "grantpt", "longjmp", "mallinfo",
-		"malloc", "mallopt", "memalign", "mtrace", "muntrace", "on_exit", "perror",
+		"getwchar", "getwchar_unlocked", "grantpt", "mallinfo", "malloc",
+		"mallopt", "memalign", "mtrace", "muntrace", "on_exit", "perror",
 		"posix_memalign", "printf", "ptsname", "ptsname_r", "putc",
 		"putc_unlocked", "putchar", "putchar_unlocked", "puts", "putw", "putwc",
 		"putwc_unlocked", "putwchar", "putwchar_unlocked", "realloc",
 		"reallocarray", "scanf", "sem_close", "sem_open", "sem_unlink",
-		"shm_open", "shm_unlink", "siglongjmp", "sigsetjmp", "snprintf",
-		"sprintf", "sscanf", "strerror", "strerror_r", "swprintf", "swscanf",
-		"tempnam", "tmpfile", "tmpfile64", "tmpnam", "unlockpt", "valloc", "verr",
+		"shm_open", "shm_unlink", "sigsetjmp", "snprintf", "sprintf",
+		"sscanf", "strerror", "strerror_r", "swprintf", "swscanf", "tempnam",
+		"tmpfile", "tmpfile64", "tmpnam", "unlockpt", "valloc", "verr",
 		"verrx", "vwarn", "vwarnx", "warn", "warnx", "wprintf", "wscanf"};
 	for(unsigned i=0;i<(sizeof(unsafe_fnc)/sizeof(char*));++i)
 	{

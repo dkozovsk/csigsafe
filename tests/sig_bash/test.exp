@@ -31,42 +31,54 @@
    ^~~~~~~~~~~~~~~~
 ./sig.c:602:3: note: function ‘run_exit_trap‘ is not known to be async-signal-safe
 ./sig.c: In function 'set_signal_handler':
-./sig.c:635:7: warning: asynchronous-unsafe function ‘throw_to_top_level‘ in signal handler ‘sigint_sighandler‘ [-fplugin=csigsafe]
+./sig.c:635:7: warning: possible asynchronous-unsafe function ‘throw_to_top_level‘ in signal handler ‘sigint_sighandler‘ [-fplugin=csigsafe]
        throw_to_top_level ();
        ^~~~~~~~~~~~~~~~~~~~~
-./sig.c:470:5: note: function ‘throw_to_top_level‘ calls function ‘jump_to_top_level‘
-     jump_to_top_level (DISCARD);
-     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-In file included from ./bashjmp.h:24,
-                 from ./shell.h:25,
-                 from ./sig.c:37:
-./posixjmp.h:35:28: note: function ‘jump_to_top_level‘ calls function ‘siglongjmp‘
- #  define sh_longjmp(x, n) siglongjmp((x), (n))
-                            ^~~~~~~~~~~~~~~~~~~~
-./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
-   sh_longjmp (top_level, value);
-   ^~~~~~~~~~
-./posixjmp.h:35:28: note: function ‘siglongjmp‘ is not known to be async-signal-safe
- #  define sh_longjmp(x, n) siglongjmp((x), (n))
-                            ^~~~~~~~~~~~~~~~~~~~
-./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
-   sh_longjmp (top_level, value);
-   ^~~~~~~~~~
-./sig.c:472:5: note: function ‘throw_to_top_level‘ calls function ‘jump_to_top_level‘
-     jump_to_top_level (EXITPROG);
+./sig.c:425:7: note: function ‘throw_to_top_level‘ calls function ‘signal_is_trapped‘
+   if (signal_is_trapped (SIGINT))
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~
+./sig.c:425:7: note: function ‘signal_is_trapped‘ is not known to be async-signal-safe
+./sig.c:426:5: note: function ‘throw_to_top_level‘ calls function ‘run_interrupt_trap‘
+     run_interrupt_trap (1);
+     ^~~~~~~~~~~~~~~~~~~~~~
+./sig.c:426:5: note: function ‘run_interrupt_trap‘ is not known to be async-signal-safe
+./sig.c:430:5: note: function ‘throw_to_top_level‘ calls function ‘parse_and_execute_cleanup‘
+     parse_and_execute_cleanup ();
      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In file included from ./bashjmp.h:24,
-                 from ./shell.h:25,
-                 from ./sig.c:37:
-./posixjmp.h:35:28: note: function ‘jump_to_top_level‘ calls function ‘siglongjmp‘
- #  define sh_longjmp(x, n) siglongjmp((x), (n))
-                            ^~~~~~~~~~~~~~~~~~~~
-./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
-   sh_longjmp (top_level, value);
-   ^~~~~~~~~~
-./posixjmp.h:35:28: note: function ‘siglongjmp‘ is not known to be async-signal-safe
- #  define sh_longjmp(x, n) siglongjmp((x), (n))
-                            ^~~~~~~~~~~~~~~~~~~~
-./sig.c:480:3: note: in expansion of macro 'sh_longjmp'
-   sh_longjmp (top_level, value);
-   ^~~~~~~~~~
+./sig.c:430:5: note: function ‘parse_and_execute_cleanup‘ is not known to be async-signal-safe
+./sig.c:433:5: note: function ‘throw_to_top_level‘ calls function ‘run_trap_cleanup‘
+     run_trap_cleanup (running_trap - 1);
+     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+./sig.c:433:5: note: function ‘run_trap_cleanup‘ is not known to be async-signal-safe
+./sig.c:436:3: note: function ‘throw_to_top_level‘ calls function ‘give_terminal_to‘
+   give_terminal_to (shell_pgrp, 0);
+   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+./sig.c:436:3: note: function ‘give_terminal_to‘ is not known to be async-signal-safe
+./sig.c:445:3: note: function ‘throw_to_top_level‘ calls function ‘reset_parser‘
+   reset_parser ();
+   ^~~~~~~~~~~~~~~
+./sig.c:445:3: note: function ‘reset_parser‘ is not known to be async-signal-safe
+./sig.c:453:3: note: function ‘throw_to_top_level‘ calls function ‘unlink_fifo_list‘
+   unlink_fifo_list ();
+   ^~~~~~~~~~~~~~~~~~~
+./sig.c:453:3: note: function ‘unlink_fifo_list‘ is not known to be async-signal-safe
+./sig.c:456:3: note: function ‘throw_to_top_level‘ calls function ‘run_unwind_protects‘
+   run_unwind_protects ();
+   ^~~~~~~~~~~~~~~~~~~~~~
+./sig.c:456:3: note: function ‘run_unwind_protects‘ is not known to be async-signal-safe
+./sig.c:462:7: note: function ‘throw_to_top_level‘ calls function ‘fflush‘
+       fflush (stdout);
+       ^~~~~~~~~~~~~~~
+./sig.c:462:7: note: function ‘fflush‘ is not known to be async-signal-safe
+./sig.c:463:7: note: function ‘throw_to_top_level‘ calls function ‘__builtin_fputc‘
+       fprintf (stderr, "\n");
+       ^~~~~~~~~~~~~~~~~~~~~~
+./sig.c:463:7: note: function ‘__builtin_fputc‘ is not known to be async-signal-safe
+./sig.c:464:7: note: function ‘throw_to_top_level‘ calls function ‘fflush‘
+       fflush (stderr);
+       ^~~~~~~~~~~~~~~
+./sig.c:464:7: note: function ‘fflush‘ is not known to be async-signal-safe
+./sig.c:469:25: note: function ‘throw_to_top_level‘ calls function ‘signal_is_trapped‘
+       (print_newline && signal_is_trapped (SIGINT)))
+                         ^~~~~~~~~~~~~~~~~~~~~~~~~~
+./sig.c:469:25: note: function ‘signal_is_trapped‘ is not known to be async-signal-safe
