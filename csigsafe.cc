@@ -1358,12 +1358,12 @@ void print_warning(tree handler,tree fnc,location_t loc,bool fatal)
 	const char* fnc_name = get_name(fnc);
 	std::string msg = "asynchronous-unsafe function";
 	if (!fatal)
-		msg = "possible " + msg;
+		msg = "possibly " + msg;
 	if(!isatty(STDERR_FILENO))
 	{
 		msg += " ‘";
 		msg += fnc_name;
-		msg += "‘ in signal handler";
+		msg += "‘ called in signal handler";
 		msg += " ‘";
 		msg += handler_name;
 		msg += "‘";
