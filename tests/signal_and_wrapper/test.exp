@@ -1,5 +1,5 @@
 ./test.c: In function 'main':
-./test.c:14:5: warning: asynchronous-unsafe function ‘my_fnc0‘ in signal handler ‘some_handler‘ [-fplugin=csigsafe]
+./test.c:14:5: warning: asynchronous-unsafe function ‘my_fnc0‘ called in signal handler ‘some_handler‘ [-fplugin=csigsafe]
      my_fnc0();
      ^~~~~~~~~
 ./test.c:25:2: note: function ‘my_fnc0‘ calls function ‘my_fnc1‘
@@ -16,7 +16,7 @@
   ^~~~~~~~~~~~~~~~
 ./test.c:37:2: note: function ‘__builtin_puts‘ is not known to be async-signal-safe
 ./test.c: In function 'handler':
-./test.c:53:5: warning: asynchronous-unsafe function ‘printf‘ in signal handler ‘handler‘ [-fplugin=csigsafe]
+./test.c:53:5: warning: asynchronous-unsafe function ‘printf‘ called in signal handler ‘handler‘ [-fplugin=csigsafe]
      printf("something");
      ^~~~~~~~~~~~~~~~~~~
 ./test.c:53:5: note: function ‘printf‘ is not known to be async-signal-safe

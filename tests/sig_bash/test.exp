@@ -1,5 +1,5 @@
 ./sig.c: In function 'termsig_handler':
-./sig.c:542:7: warning: possible asynchronous-unsafe function ‘termsig_handler‘ in signal handler ‘termsig_sighandler‘ [-fplugin=csigsafe]
+./sig.c:542:7: warning: possibly asynchronous-unsafe function ‘termsig_handler‘ called in signal handler ‘termsig_sighandler‘ [-fplugin=csigsafe]
        termsig_handler (sig);
        ^~~~~~~~~~~~~~~~~~~~~
 ./sig.c:573:24: note: function ‘termsig_handler‘ calls function ‘signal_is_trapped‘
@@ -31,7 +31,7 @@
    ^~~~~~~~~~~~~~~~
 ./sig.c:602:3: note: function ‘run_exit_trap‘ is not known to be async-signal-safe
 ./sig.c: In function 'set_signal_handler':
-./sig.c:635:7: warning: possible asynchronous-unsafe function ‘throw_to_top_level‘ in signal handler ‘sigint_sighandler‘ [-fplugin=csigsafe]
+./sig.c:635:7: warning: possibly asynchronous-unsafe function ‘throw_to_top_level‘ called in signal handler ‘sigint_sighandler‘ [-fplugin=csigsafe]
        throw_to_top_level ();
        ^~~~~~~~~~~~~~~~~~~~~
 ./sig.c:425:7: note: function ‘throw_to_top_level‘ calls function ‘signal_is_trapped‘
