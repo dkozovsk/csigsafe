@@ -110,7 +110,7 @@ public:
 	bb_data(unsigned int id);
 	bb_data() = delete;
 	//methods
-	bool compute(location_t &err_loc, bool &changed, function_data &obj);
+	bool compute(location_t &err_loc, tree &err_fnc, bool &changed, function_data &obj);
 	unsigned int get_block_id();
 };
 
@@ -124,6 +124,7 @@ public:
 	std::list<depend_data> depends;
 	
 	location_t errno_loc;
+	tree errno_fnc;
 	std::list<tree> stored_errno;
 	
 	std::list<bb_data> block_status;
@@ -176,7 +177,8 @@ errno_var tree_to_errno_var(tree var);
 //warnings
 inline void print_warning(tree handler, tree fnc,location_t loc,bool fatal);
 void print_note(tree fnc, location_t loc, bool fatal);
-inline void print_errno_warning(tree handler, location_t loc);
+inline void print_errno_warning(tree handler, tree fnc, location_t loc);
+void print_errno_note(tree fnc);
 //errno list operations
 bool is_var_in_list(tree var, std::list<tree> &list);
 void add_unique_to_list(tree var, std::list<tree> &list);

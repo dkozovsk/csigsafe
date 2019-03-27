@@ -129,7 +129,10 @@ void plugin_data::handle_dependencies()
 											it->ic=IC_RESTORE_ERRNO;
 									}
 									else
+									{
 										it->ic=return_number == RC_ERRNO_CHANGED ? IC_CHANGE_ERRNO : IC_EXIT;
+										it->var=depends.fnc;
+									}
 									if(!block_data.is_exit)
 										block_data.is_exit=return_number == RC_SAFE_EXIT;
 									block_data.computed=false;
@@ -181,7 +184,7 @@ void plugin_data::handle_dependencies()
 					{
 						solved=true;
 						obj.set_flag(FLG_WAS_ERR,true);
-						print_errno_warning(obj.get_fnc_decl(),obj.errno_loc);
+						print_errno_warning(obj.get_fnc_decl(), obj.errno_fnc, obj.errno_loc);
 					}
 				}
 			}
@@ -193,7 +196,7 @@ void plugin_data::handle_dependencies()
 					if (obj.get_flag(FLG_ERRNO_CHANGED) && obj.get_flag(FLG_IS_HANDLER))
 					{
 						obj.set_flag(FLG_WAS_ERR,true);
-						print_errno_warning(obj.get_fnc_decl(),obj.errno_loc);
+						print_errno_warning(obj.get_fnc_decl(), obj.errno_fnc, obj.errno_loc);
 					}
 				}
 			}
@@ -298,7 +301,7 @@ errno_var tree_to_errno_var(tree var)
 
 //compute output set from input set for one basic block
 //returns true, if errno is changed and computed block is return from the function, false otherwise
-bool bb_data::compute(location_t &err_loc,bool &changed,function_data &obj)
+bool bb_data::compute(location_t &err_loc, tree &err_fnc, bool &changed, function_data &obj)
 {
 	this->computed=true;
 	std::set<errno_var> new_set=this->input_set;
@@ -313,6 +316,7 @@ bool bb_data::compute(location_t &err_loc,bool &changed,function_data &obj)
 					if (it!=new_set.end())
 					{
 						err_loc=instr.instr_loc;
+						err_fnc=instr.var;
 						new_set.erase(it);
 					}
 				}
@@ -509,7 +513,7 @@ void function_data::analyze_CFG()
 				continue;
 			if (!empty)
 				status.input_set=new_set;
-			if (status.compute(err_loc,changed,*this))
+			if (status.compute(err_loc,this->errno_fnc,changed,*this))
 			{
 				this->errno_loc=err_loc;
 				this->set_flag(FLG_ERRNO_CHANGED,true);
@@ -943,7 +947,7 @@ void function_data::process_gimple_call(bb_data &status,gimple * stmt, bool &all
 	{
 		instruction new_instr;
 		new_instr.ic=IC_CHANGE_ERRNO;
-		new_instr.var=nullptr;
+		new_instr.var=fn_decl;
 		new_instr.instr_loc=gimple_location(stmt);
 		status.instr_list.push_back(new_instr);
 	}
@@ -952,7 +956,7 @@ void function_data::process_gimple_call(bb_data &status,gimple * stmt, bool &all
 		//status.exit_found=true;
 		instruction new_instr;
 		new_instr.ic=IC_EXIT;
-		new_instr.var=nullptr;
+		new_instr.var=fn_decl;
 		new_instr.instr_loc=gimple_location(stmt);
 		status.instr_list.push_back(new_instr);
 		status.is_exit=true;
@@ -1215,7 +1219,7 @@ int8_t scan_own_function (const char* name,std::list<const char*> &call_tree,boo
 				if (obj.get_flag(FLG_ERRNO_CHANGED) && !obj.get_flag(FLG_IS_HANDLER))
 				{
 					obj.set_flag(FLG_WAS_ERR,true);
-					print_errno_warning(obj.get_fnc_decl(),obj.errno_loc);
+					print_errno_warning(obj.get_fnc_decl(), obj.errno_fnc, obj.errno_loc);
 				}
 				if (obj.get_flag(FLG_IS_HANDLER) && obj.get_flag(FLG_SCANED))
 					return return_number;
@@ -1327,7 +1331,7 @@ int8_t scan_own_function (const char* name,std::list<const char*> &call_tree,boo
 				if (obj.get_flag(FLG_IS_HANDLER) && obj.get_flag(FLG_ERRNO_CHANGED))
 				{
 					obj.set_flag(FLG_WAS_ERR,true);
-					print_errno_warning(obj.get_fnc_decl(),obj.errno_loc);
+					print_errno_warning(obj.get_fnc_decl(), obj.errno_fnc, obj.errno_loc);
 				}
 			}
 			obj.set_flag(FLG_SCANED,true);
@@ -1447,7 +1451,7 @@ void print_note(tree fnc, location_t loc, bool fatal)
 }
 
 //print warning about changed errno in signal handler 'handler'
-inline void print_errno_warning(tree handler,location_t loc)
+inline void print_errno_warning(tree handler, tree fnc, location_t loc)
 {
 	const char* handler_name = get_name(handler);
 	std::string msg = "errno may be changed in signal handler";
@@ -1471,6 +1475,36 @@ inline void print_errno_warning(tree handler,location_t loc)
 		msg += "\033[0m]";
 	}
 	warning_at(loc,0,"%s",msg.c_str());
+	print_errno_note(fnc);
+}
+
+void print_errno_note(tree fnc)
+{
+	if(fnc==nullptr)
+		return;
+	for (function_data &obj: data.fnc_list)
+	{
+		if (strcmp(get_name(obj.get_fnc_decl()),get_name(fnc))==0)
+		{
+			std::string msg = "function ";
+			if(!isatty(STDERR_FILENO))
+			{
+				msg += "‘";
+				msg += get_name(fnc);
+				msg += "‘";
+			}
+			else
+			{
+				msg += "‘\033[1;1m";
+				msg += get_name(fnc);
+				msg += "\033[0m‘";
+			}
+			msg += " may change errno";
+			inform(obj.errno_loc,"%s",msg.c_str());
+			print_errno_note(obj.errno_fnc);
+			return;
+		}
+	}
 }
 
 
