@@ -56,7 +56,7 @@ struct instruction {
 };
 
 // struct for remembering dependencies across functions
-struct depend_data {
+struct depends_on_function {
   tree fnc;
   location_t loc;
   gimple * stmt;
@@ -94,9 +94,9 @@ struct errno_in_builtin {
 	bool valid=false;
 };
 
-class function_data;
+class css_function;
 
-class bb_data {
+class css_bb {
 	unsigned int block_id;
 public:
 	bool computed=false;
@@ -107,45 +107,45 @@ public:
 	std::list<unsigned int> preds;
 	
 	//constructor
-	bb_data(unsigned int id);
-	bb_data() = delete;
+	css_bb(unsigned int id);
+	css_bb() = delete;
 	//methods
-	bool compute(location_t &err_loc, tree &err_fnc, bool &changed, function_data &obj);
+	bool compute(location_t &err_loc, tree &err_fnc, bool &changed, css_function &obj);
 	unsigned int get_block_id();
 };
 
 //struct for storing all informations about scaned functions
-class function_data {
+class css_function {
 	bool flags[10];
 	function* fnc_ptr;
 	tree fnc_decl;
 public:
 	std::list<remember_error> err_log;
-	std::list<depend_data> depends;
+	std::list<depends_on_function> depends;
 	
 	location_t errno_loc;
 	tree errno_fnc;
 	std::list<tree> stored_errno;
 	
-	std::list<bb_data> block_status;
+	std::list<css_bb> block_status;
 	//constructor
-	function_data(function* fun, tree fnc_tree);
-	function_data() = delete;
+	css_function(function* fun, tree fnc_tree);
+	css_function() = delete;
 	//methods
 	void set_flag(unsigned int index,bool value);
 	bool get_flag(unsigned int index);
 	tree get_fnc_decl();
 	function* get_fnc_ptr();
-	void process_gimple_call(bb_data &status,gimple * stmt, bool &all_ok, std::list<const char*> &call_tree,
+	void process_gimple_call(css_bb &status,gimple * stmt, bool &all_ok, std::list<const char*> &call_tree,
 									bool &errno_valid, unsigned int &errno_stored, std::list<tree> &errno_ptr);
-	void process_gimple_assign(bb_data &status, gimple * stmt, bool &errno_valid, unsigned int &errno_stored,
+	void process_gimple_assign(css_bb &status, gimple * stmt, bool &errno_valid, unsigned int &errno_stored,
 										errno_in_builtin &errno_builtin_storage, std::list<tree> &errno_ptr);
 	void analyze_CFG();
 };
 
-class plugin_data {
+class css_plugin_core {
 public:
-	std::list<function_data> fnc_list;
+	std::list<css_function> fnc_list;
 	std::list<tree> handlers;
 	std::list<handler_in_var> possible_handlers;
 	std::list<setter_function> own_setters;

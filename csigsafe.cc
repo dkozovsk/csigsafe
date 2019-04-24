@@ -1,6 +1,6 @@
 #include "csigsafe.hh"
 
-static plugin_data data;
+static css_plugin_core plugin_core;
 
 static const char * const plugin_name = "csigsafe";
 static const char * const release_version = "1.00";
@@ -34,29 +34,29 @@ bool operator== (const errno_var &a, const errno_var &b)
 	return false;
 }
 
-bb_data::bb_data(unsigned int id)
+css_bb::css_bb(unsigned int id)
 {
 	this->block_id=id;
 }
 
-unsigned int bb_data::get_block_id()
+unsigned int css_bb::get_block_id()
 {
 	return this->block_id;
 }
 
-void function_data::set_flag(unsigned int index,bool value)
+void css_function::set_flag(unsigned int index,bool value)
 {
 	if(index>=FLG_OUT_OF_RANGE)
 		return;
 	this->flags[index]=value;
 }
-bool function_data::get_flag(unsigned int index)
+bool css_function::get_flag(unsigned int index)
 {
 	if(index>=FLG_OUT_OF_RANGE)
 		return false;
 	return this->flags[index];
 }
-function_data::function_data(function* fun, tree fnc_tree)
+css_function::css_function(function* fun, tree fnc_tree)
 {
 	this->fnc_ptr=fun;
 	this->fnc_decl=fnc_tree;
@@ -72,17 +72,17 @@ function_data::function_data(function* fun, tree fnc_tree)
 	this->set_flag(FLG_IS_ERRNO_SETTER,false);
 	this->set_flag(FLG_ERRNO_CHANGED,false);
 }
-tree function_data::get_fnc_decl()
+tree css_function::get_fnc_decl()
 {
 	return this->fnc_decl;
 }
-function* function_data::get_fnc_ptr()
+function* css_function::get_fnc_ptr()
 {
 	return this->fnc_ptr;
 }
 
 //scan functions which are defined after the scan of function, which called them
-void plugin_data::handle_dependencies()
+void css_plugin_core::handle_dependencies()
 {
 	bool all_solved=true;
 	bool nothing_solved=false;
@@ -90,7 +90,7 @@ void plugin_data::handle_dependencies()
 	{
 		nothing_solved=true;
 		all_solved=true;
-		for (function_data &obj: this->fnc_list)
+		for (css_function &obj: this->fnc_list)
 		{
 			bool solved=true;
 			if (obj.get_flag(FLG_IS_OK))
@@ -99,10 +99,10 @@ void plugin_data::handle_dependencies()
 				solved=false;
 			while(solved && !obj.depends.empty())
 			{
-				std::list<depend_data>::iterator depend_it;
+				std::list<depends_on_function>::iterator depend_it;
 				for(depend_it=obj.depends.begin();depend_it!=obj.depends.end();)
 				{
-					depend_data depends=*depend_it;
+					depends_on_function depends=*depend_it;
 					std::list<const char*> call_tree;
 					int8_t return_number=scan_own_function(get_name(depends.fnc),call_tree,nullptr);
 					if (return_number < 99)
@@ -110,7 +110,7 @@ void plugin_data::handle_dependencies()
 						//if call of this function may change errno or is exit function replace placeholder with corresponding instruction
 						if ((return_number == RC_ERRNO_CHANGED || return_number == RC_SAFE_EXIT || return_number == RC_ERRNO_SETTER) && !obj.get_flag(FLG_WAS_ERR))
 						{
-							for (bb_data &block_data : obj.block_status)
+							for (css_bb &block_data : obj.block_status)
 							{
 								if(depends.parent_block_id==block_data.get_block_id())
 								{
@@ -153,7 +153,7 @@ void plugin_data::handle_dependencies()
 							new_err.err_fatal = return_number==RC_ASYNCH_UNSAFE;
 							obj.err_log.push_back(new_err);
 						}
-						std::list<depend_data>::iterator tmp=depend_it;
+						std::list<depends_on_function>::iterator tmp=depend_it;
 						++depend_it;
 						obj.depends.erase(tmp);
 						
@@ -169,7 +169,7 @@ void plugin_data::handle_dependencies()
 				}
 			}
 			bool all_cyclic=true;
-			for (depend_data &depends: obj.depends)
+			for (depends_on_function &depends: obj.depends)
 			{
 				if(!depends.cyclic)
 					all_cyclic=false;
@@ -301,7 +301,7 @@ errno_var tree_to_errno_var(tree var)
 
 //compute output set from input set for one basic block
 //returns true, if errno is changed and computed block is return from the function, false otherwise
-bool bb_data::compute(location_t &err_loc, tree &err_fnc, bool &changed, function_data &obj)
+bool css_bb::compute(location_t &err_loc, tree &err_fnc, bool &changed, css_function &obj)
 {
 	this->computed=true;
 	std::set<errno_var> new_set=this->input_set;
@@ -418,14 +418,14 @@ bool bb_data::compute(location_t &err_loc, tree &err_fnc, bool &changed, functio
 			setter_function new_setter;
 			new_setter.setter=get_name(obj.get_fnc_decl());
 			new_setter.position=it->id-1;
-			if (!is_setter(obj.get_fnc_decl(), data.errno_setters))
-				data.errno_setters.push_back(new_setter);
+			if (!is_setter(obj.get_fnc_decl(), plugin_core.errno_setters))
+				plugin_core.errno_setters.push_back(new_setter);
 			else
 			{
-				if(!data.has_same_param(new_setter))
+				if(!plugin_core.has_same_param(new_setter))
 				{
 					obj.set_flag(FLG_CAN_BE_SETTER,false);
-					data.remove_errno_setter(new_setter);
+					plugin_core.remove_errno_setter(new_setter);
 				}
 			}
 		}
@@ -434,7 +434,7 @@ bool bb_data::compute(location_t &err_loc, tree &err_fnc, bool &changed, functio
 			setter_function new_setter;
 			new_setter.setter=get_name(obj.get_fnc_decl());
 			obj.set_flag(FLG_CAN_BE_SETTER,false);
-			data.remove_errno_setter(new_setter);
+			plugin_core.remove_errno_setter(new_setter);
 		}
 		return false;
 	}
@@ -447,7 +447,7 @@ bool bb_data::compute(location_t &err_loc, tree &err_fnc, bool &changed, functio
 }
 
 //analyze CFG for one function
-void function_data::analyze_CFG()
+void css_function::analyze_CFG()
 {
 	//analyze if it is own exit function
 	//that means that all predecessors of exit block must
@@ -455,13 +455,13 @@ void function_data::analyze_CFG()
 	this->set_flag(FLG_IS_EXIT,true);
 	//TODO better check for exit, own exit functions without noreturn
 	//(not common would mean that i call my exit, and after that i call something else. it is nonsense)
-	for(bb_data &status : this->block_status)
+	for(css_bb &status : this->block_status)
 	{
 		if(status.get_block_id()==1)
 		{
 			for(unsigned int predecessor : status.preds)
 			{
-				for (bb_data &block_data : this->block_status)
+				for (css_bb &block_data : this->block_status)
 				{
 					if(predecessor==block_data.get_block_id())
 					{
@@ -480,7 +480,7 @@ void function_data::analyze_CFG()
 	do
 	{
 		changed=false;
-		for (bb_data &status : this->block_status)
+		for (css_bb &status : this->block_status)
 		{
 			std::set<errno_var> new_set;
 			bool empty=true;
@@ -488,7 +488,7 @@ void function_data::analyze_CFG()
 			//of all blocks that are predecessors for computed block
 			for(unsigned int predecessor : status.preds)
 			{
-				for (bb_data &block_data : this->block_status)
+				for (css_bb &block_data : this->block_status)
 				{
 					if(predecessor==block_data.get_block_id())
 					{
@@ -537,7 +537,7 @@ bool is_setter(tree fnc, std::list<setter_function> &setter_list)
 }
 
 //one function cant set errno from two different parameters
-bool plugin_data::has_same_param(setter_function &setter)
+bool css_plugin_core::has_same_param(setter_function &setter)
 {
 	for (setter_function &obj: this->errno_setters)
 	{
@@ -552,7 +552,7 @@ bool plugin_data::has_same_param(setter_function &setter)
 }
 
 //remove setter from errno_setters list
-void plugin_data::remove_errno_setter(setter_function &setter)
+void css_plugin_core::remove_errno_setter(setter_function &setter)
 {
 	std::list<setter_function>::iterator it;
 	for(it = this->errno_setters.begin(); it != this->errno_setters.end(); ++it)
@@ -570,7 +570,7 @@ tree get_var_from_setter_stmt (gimple*stmt)
 {
 	if (gimple_code(stmt)==GIMPLE_CALL)
 	{
-		for (setter_function &obj: data.errno_setters)
+		for (setter_function &obj: plugin_core.errno_setters)
 		{
 			tree current_fn = gimple_call_fn(stmt);
 			if (!current_fn)
@@ -614,12 +614,12 @@ tree get_handler(gimple* stmt)
 		if (!name)
 			return nullptr;
 		std::list<handler_in_var>::iterator it;
-		for(it = data.possible_handlers.begin(); it != data.possible_handlers.end(); ++it)
+		for(it = plugin_core.possible_handlers.begin(); it != plugin_core.possible_handlers.end(); ++it)
 		{
 			if (strcmp(it->var_name,name)==0)
 			{
 				handler_in_var var_handler = *it;
-				data.possible_handlers.erase(it);
+				plugin_core.possible_handlers.erase(it);
 				if(!is_gimple_addressable (var_handler.handler) && TREE_CODE(var_handler.handler) == ADDR_EXPR)
 					return var_handler.handler;
 				else if (TREE_CODE(var_handler.handler) == PARM_DECL)
@@ -632,8 +632,8 @@ tree get_handler(gimple* stmt)
 							setter_function new_setter;
 							new_setter.setter = get_name(current_function_decl);
 							new_setter.position = counter;
-							data.own_setters.push_front(new_setter);
-							data.added_new_setter=true;
+							plugin_core.own_setters.push_front(new_setter);
+							plugin_core.added_new_setter=true;
 							break;
 						}
 						++counter;
@@ -674,8 +674,8 @@ tree get_handler(gimple* stmt)
 					setter_function new_setter;
 					new_setter.setter = get_name(current_function_decl);
 					new_setter.position = counter;
-					data.own_setters.push_front(new_setter);
-					data.added_new_setter=true;
+					plugin_core.own_setters.push_front(new_setter);
+					plugin_core.added_new_setter=true;
 					break;
 				}
 				++counter;
@@ -683,12 +683,12 @@ tree get_handler(gimple* stmt)
 		}
 	}
 	else
-		return data.scan_own_handler_setter(stmt,current_function_decl);
+		return plugin_core.scan_own_handler_setter(stmt,current_function_decl);
 	return nullptr;
 }
 
 //look through own setters, try to find handler if own setter was called
-tree plugin_data::scan_own_handler_setter(gimple* stmt,tree fun_decl)
+tree css_plugin_core::scan_own_handler_setter(gimple* stmt,tree fun_decl)
 {
 	for (setter_function &obj: this->own_setters)
 	{
@@ -852,7 +852,7 @@ bool is_handler_wrong_fnc(const char* name)
 }
 
 //proccess gimple call statement inside scan own function
-void function_data::process_gimple_call(bb_data &status,gimple * stmt, bool &all_ok, std::list<const char*> &call_tree,
+void css_function::process_gimple_call(css_bb &status,gimple * stmt, bool &all_ok, std::list<const char*> &call_tree,
 											bool &errno_valid, unsigned int &errno_stored, std::list<tree> &errno_ptr)
 {
 	tree fn_decl = gimple_call_fndecl(stmt);
@@ -871,7 +871,7 @@ void function_data::process_gimple_call(bb_data &status,gimple * stmt, bool &all
 		{
 			if ((return_number = scan_own_function(called_function_name,call_tree,nullptr))>=99)
 			{
-				depend_data save_dependencies;
+				depends_on_function save_dependencies;
 				if (return_number==RC_CYCLIC)
 				{
 					return_number=RC_ASYNCH_SAFE;
@@ -894,7 +894,7 @@ void function_data::process_gimple_call(bb_data &status,gimple * stmt, bool &all
 				save_dependencies.parent_block_id=status.get_block_id();
 
 				all_ok=false;
-				data.dependencies_handled=false;
+				plugin_core.dependencies_handled=false;
 				this->depends.push_front(save_dependencies);
 			}
 		}
@@ -973,7 +973,7 @@ void function_data::process_gimple_call(bb_data &status,gimple * stmt, bool &all
 }
 
 //proccess gimple assign statement inside scan own function
-void function_data::process_gimple_assign(bb_data &status, gimple * stmt, bool &errno_valid, unsigned int &errno_stored,
+void css_function::process_gimple_assign(css_bb &status, gimple * stmt, bool &errno_valid, unsigned int &errno_stored,
 												errno_in_builtin &errno_builtin_storage, std::list<tree> &errno_ptr)
 {
 	//check if errno was stored or restored
@@ -1208,7 +1208,7 @@ int8_t scan_own_function (const char* name,std::list<const char*> &call_tree,boo
 	errno_in_builtin errno_builtin_storage;
 	std::list<tree> errno_ptr;
 
-	for (function_data &obj: data.fnc_list)
+	for (css_function &obj: plugin_core.fnc_list)
 	{
 		if (strcmp(get_name(obj.get_fnc_decl()),name)==0)
 		{
@@ -1278,7 +1278,7 @@ int8_t scan_own_function (const char* name,std::list<const char*> &call_tree,boo
 					if (!obj.get_flag(FLG_IS_OK))
 					{
 						bool all_cyclic=true;
-						for (depend_data &depends: obj.depends)
+						for (depends_on_function &depends: obj.depends)
 						{
 							if(!depends.cyclic)
 								all_cyclic=false;
@@ -1296,7 +1296,7 @@ int8_t scan_own_function (const char* name,std::list<const char*> &call_tree,boo
 			//start the scan
 			FOR_ALL_BB_FN(bb, obj.get_fnc_ptr())
 			{
-				bb_data status(bb->index);
+				css_bb status(bb->index);
 
 				status.input_set.insert(pseudo_errno);
 				status.output_set.insert(pseudo_errno);
@@ -1402,7 +1402,7 @@ void print_warning(tree handler,tree fnc,location_t loc,bool fatal)
 
 void print_note(tree fnc, location_t loc, bool fatal)
 {
-	for (function_data &obj: data.fnc_list)
+	for (css_function &obj: plugin_core.fnc_list)
 	{
 		if (strcmp(get_name(obj.get_fnc_decl()),get_name(fnc))==0)
 		{
@@ -1482,7 +1482,7 @@ void print_errno_note(tree fnc)
 {
 	if(fnc==nullptr)
 		return;
-	for (function_data &obj: data.fnc_list)
+	for (css_function &obj: plugin_core.fnc_list)
 	{
 		if (strcmp(get_name(obj.get_fnc_decl()),get_name(fnc))==0)
 		{
@@ -1539,8 +1539,8 @@ struct handler_check_pass : gimple_opt_pass
 	{
 		basic_block bb;
 		tree handler=nullptr;
-		function_data new_fnc(fun,current_function_decl);
-		data.fnc_list.push_front(new_fnc);
+		css_function new_fnc(fun,current_function_decl);
+		plugin_core.fnc_list.push_front(new_fnc);
 		//Start look for handlers
 		FOR_ALL_BB_FN(bb, fun)
 		{
@@ -1590,7 +1590,7 @@ struct handler_check_pass : gimple_opt_pass
 											handler_in_var new_var_handler;
 											new_var_handler.var_name=var_name;
 											new_var_handler.handler=gimple_assign_rhs1 (stmt);
-											data.possible_handlers.push_front(new_var_handler);
+											plugin_core.possible_handlers.push_front(new_var_handler);
 										}
 									}
 								}
@@ -1600,7 +1600,7 @@ struct handler_check_pass : gimple_opt_pass
 				}
 				if (handler!=nullptr)//handler found, add to list of handlers to scan
 				{
-					data.handlers.push_front(handler);
+					plugin_core.handlers.push_front(handler);
 					handler=nullptr;
 				}
 			}
@@ -1608,10 +1608,10 @@ struct handler_check_pass : gimple_opt_pass
 		//End look for handlers
 
 		//if new setter was found, check already checked functions with new setters
-		while (data.added_new_setter)
+		while (plugin_core.added_new_setter)
 		{
-			data.added_new_setter=false;
-			for (function_data &obj: data.fnc_list)
+			plugin_core.added_new_setter=false;
+			for (css_function &obj: plugin_core.fnc_list)
 			{
 				basic_block bb;
 				FOR_ALL_BB_FN(bb, obj.get_fnc_ptr())
@@ -1623,10 +1623,10 @@ struct handler_check_pass : gimple_opt_pass
 						gimple * stmt = gsi_stmt (gsi);
 						if (gimple_code(stmt)==GIMPLE_CALL)
 						{
-							handler = data.scan_own_handler_setter(stmt,obj.get_fnc_decl());
+							handler = plugin_core.scan_own_handler_setter(stmt,obj.get_fnc_decl());
 							if (handler!=nullptr)
 							{
-								data.handlers.push_front(handler);
+								plugin_core.handlers.push_front(handler);
 								handler=nullptr;
 							}
 						}
@@ -1636,9 +1636,9 @@ struct handler_check_pass : gimple_opt_pass
 		}
 
 		//scan all identified signal handlers
-		std::list<tree>::iterator it = data.handlers.begin();
+		std::list<tree>::iterator it = plugin_core.handlers.begin();
 		std::list<tree>::iterator it_next=it;
-		while(it!=data.handlers.end())
+		while(it!=plugin_core.handlers.end())
 		{
 			++it_next;
 			handler=*it;
@@ -1649,17 +1649,17 @@ struct handler_check_pass : gimple_opt_pass
 				std::list<const char*> call_tree;
 				scan_own_function(get_name(handler),call_tree,&found);
 				if (found)
-					data.handlers.erase(it);
+					plugin_core.handlers.erase(it);
 			}
 			else
-				data.handlers.erase(it);
+				plugin_core.handlers.erase(it);
 			it=it_next;
 		}
 		//end handlers check
 
 		//if there are unsolved dependencies try to handle them
-		if (!data.dependencies_handled)
-			data.handle_dependencies();
+		if (!plugin_core.dependencies_handled)
+			plugin_core.handle_dependencies();
 
 		return 0;
 	}

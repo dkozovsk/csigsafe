@@ -1,5 +1,5 @@
 Name:       csigsafe
-Version:    1.00
+Version:    1.00.7.gc2dba00
 Release:    1%{?dist}
 Summary:    TODO
 License:    GPLv3+
@@ -12,7 +12,7 @@ BuildRequires: gcc-plugin-devel
 BuildRequires: cmake
 
 %description
-This GCC plug-in detects bugs in signal handlers.
+TODO
 
 %global HANDLER_PLUGIN_DIR %(gcc -print-file-name=plugin)
 
