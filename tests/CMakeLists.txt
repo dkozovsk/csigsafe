@@ -2,9 +2,18 @@ cmake_minimum_required (VERSION 2.6)
 project (handler_plug)
 enable_testing()
 
+# -fdiagnostics-show-line-numbers is enabled by default in gcc-9
+# we need to disable it (if the flag exists) to make the tests pass
+set(HOST_CFLAGS)
+include(CheckCCompilerFlag)
+check_c_compiler_flag(-fno-diagnostics-show-line-numbers HAVE_NO_NL)
+if(HAVE_NO_NL)
+    set(HOST_CFLAGS -fno-diagnostics-show-line-numbers)
+endif()
+
 macro(add_test_wrap test_name)
     add_test("${test_name}" bash -o pipefail -c
-        "LC_ALL=C CCACHE_DISABLE=1 MALLOC_PERTURB_=170 export testdir=${test_name} && sh ./runtest.sh")
+        "LC_ALL=C CCACHE_DISABLE=1 MALLOC_PERTURB_=170 testdir='${test_name}' HOST_CFLAGS='${HOST_CFLAGS}' sh ./runtest.sh")
 endmacro()
 
 if("${CMAKE_CXX_COMPILER}" MATCHES ".*NOTFOUND")
