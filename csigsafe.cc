@@ -1388,7 +1388,7 @@ void print_warning(tree handler,tree fnc,location_t loc,bool fatal)
 	{
 		msg += " ‘\033[1;1m";
 		msg += fnc_name;
-		msg += "\033[0m‘ in signal handler";
+		msg += "\033[0m‘ called in signal handler";
 		msg += " ‘\033[1;1m";
 		msg += handler_name;
 		msg += "\033[0m‘";
